@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dairy-Free Daily Tracker</title>
+<meta name="theme-color" content="#f4f9f3" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#101a13" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Dairy-Free">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f4f9f3;--surface:#ffffff;--text:#1c2b20;--muted:#5b6d60;--accent:#2f9e5b;--accent-ink:#ffffff;--accent-soft:#ddf2e3;--line:#d9e6db;--today:#fff4d6;--flame:#e8782a;color-scheme:light}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#101a13;--surface:#18251c;--text:#e7f1e9;--muted:#9bb0a0;--accent:#46c27a;--accent-ink:#08210f;--accent-soft:#1f3a29;--line:#2a3d30;--today:#3a3318;--flame:#f2954d;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#101a13;--surface:#18251c;--text:#e7f1e9;--muted:#9bb0a0;--accent:#46c27a;--accent-ink:#08210f;--accent-soft:#1f3a29;--line:#2a3d30;--today:#3a3318;--flame:#f2954d;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+body{padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px);overscroll-behavior-y:none}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.45}
+main{max-width:760px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:1.6rem;margin:0 0 4px}
+.sub{color:var(--muted);margin:0 0 16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.boost{background:var(--accent-soft);border-color:transparent;margin-bottom:14px}
+.boost small{display:block;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em;font-size:.72rem}
+.boost p{margin:4px 0 0;font-size:1.1rem;font-weight:600}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.stat{text-align:center;padding:10px 6px}
+.stat b{display:block;font-size:1.6rem}
+.stat span{color:var(--muted);font-size:.8rem}
+.bar{height:12px;background:var(--accent-soft);border-radius:99px;overflow:hidden;margin:6px 0 4px}
+.bar i{display:block;height:100%;width:0;background:var(--accent);border-radius:99px;transition:width .4s}
+.badges{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+.badge{font-size:.82rem;padding:6px 10px;border-radius:99px;border:1px dashed var(--line);color:var(--muted);opacity:.7}
+.badge.on{background:var(--accent);color:var(--accent-ink);border-style:solid;border-color:var(--accent);opacity:1;font-weight:600}
+.tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:14px 0}
+.tools label{color:var(--muted);font-size:.9rem}
+input[type=date],.ghost{font:inherit;color:var(--text);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+.ghost{cursor:pointer;margin-left:auto}
+.wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+table{width:100%;border-collapse:collapse;min-width:520px}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+tr:last-child td{border-bottom:0}
+tr.today td{background:var(--today)}
+tr.locked td{opacity:.55}
+td.day{font-weight:700;white-space:nowrap}
+td.msg{color:var(--muted);font-size:.9rem}
+.ms{display:inline-block;margin-left:6px;font-size:.7rem;padding:2px 7px;border-radius:99px;background:var(--accent-soft);color:var(--accent)}
+.chk{font:inherit;font-weight:600;min-width:128px;padding:8px 12px;border-radius:10px;cursor:pointer;border:2px solid var(--accent);background:transparent;color:var(--accent)}
+.chk.done{background:var(--accent);color:var(--accent-ink)}
+.chk.missed{border-color:var(--line);color:var(--muted);border-style:dashed}
+.chk,.ghost{min-height:44px}
+input[type=date]{font-size:16px;min-height:44px}
+.chk:disabled{cursor:not-allowed;border-color:var(--line);color:var(--muted)}
+.chk:focus-visible,.ghost:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.note{color:var(--muted);font-size:.8rem;margin-top:12px}
+</style>
+</head>
+<body>
+<main>
+  <h1>🥛🚫 Dairy-Free Daily Tracker</h1>
+  <p class="sub">Check in once a day when you had no milk or dairy products. Small wins, every day.</p>
+
+  <div class="card boost"><small id="boostLabel">Today’s boost</small><p id="boost"></p></div>
+
+  <div class="stats">
+    <div class="card stat"><b id="streak">0</b><span>🔥 Current streak</span></div>
+    <div class="card stat"><b id="count">0/30</b><span>✅ Days done</span></div>
+    <div class="card stat"><b id="best">0</b><span>🏅 Best streak</span></div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;justify-content:space-between"><strong>Progress</strong><span id="pct">0%</span></div>
+    <div class="bar"><i id="fill"></i></div>
+  </div>
+
+  <div class="badges" id="badges"></div>
+
+  <div class="tools">
+    <label for="start">Challenge starts</label>
+    <input type="date" id="start">
+    <button class="ghost" id="reset" type="button">Reset</button>
+  </div>
+
+  <div class="wrap">
+    <table>
+      <thead><tr><th>Day</th><th>Date</th><th>Check-in</th><th>Daily boost</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+  <p class="note">Future days unlock on their date. Forgot to tick a past day? Tap it to mark it. Remember: hidden dairy can be in whey, casein, butter, ghee, cream and some sauces.</p>
+</main>
+
+<script>
+var N = 30;
+var LINES = [
+"Day one. Every streak starts with a single check.",
+"Two in a row — you’re already building momentum.",
+"Three days! Read labels like a detective.",
+"Swap of the day: oat, almond or soy instead of milk.",
+"Cravings come in waves — ride them out.",
+"Almost a full week. Keep going!",
+"One week done! Reward yourself with something dairy-free you love.",
+"Week two begins. You’ve proven you can do this.",
+"Check for hidden dairy: whey, casein, butter, ghee, cream.",
+"Double digits! Your streak is real now.",
+"Plan tomorrow’s meals tonight.",
+"Eating out? Ask about butter and cream in sauces.",
+"Almost two weeks — look how far you’ve come.",
+"Two weeks strong!",
+"Halfway there. Don’t stop now.",
+"Try a new dairy-free recipe today.",
+"Discipline is choosing what you want most over what you want now.",
+"Small choices, repeated daily, become who you are.",
+"Tired? Check in anyway — tomorrow-you says thanks.",
+"Ten days to go. The finish line is in sight.",
+"Three weeks — this is becoming a habit.",
+"Tell a friend about your progress.",
+"You’re stronger than the craving.",
+"Six days left. Finish what you started.",
+"Five to go — keep the streak alive.",
+"Four days. You’ve got this.",
+"Three days left. Don’t let up.",
+"Two more — almost a champion.",
+"One more day after this one!",
+"Day 30! You did it. Celebrate your consistency 🎉"
+];
+var MILESTONES = [[3,"🌱 3 days"],[7,"💪 1 week"],[14,"🌿 2 weeks"],[21,"🏅 3 weeks"],[30,"🏆 30 days"]];
+var LS = "dairyfree-tracker-v1";
+
+function pad(n){return n<10?"0"+n:""+n;}
+function iso(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());}
+function parse(s){var p=s.split("-");return new Date(+p[0],+p[1]-1,+p[2]);}
+function todayDate(){var n=new Date();return new Date(n.getFullYear(),n.getMonth(),n.getDate());}
+function addDays(d,k){return new Date(d.getFullYear(),d.getMonth(),d.getDate()+k);}
+
+var state = {start: iso(todayDate()), done: {}};
+var dirty = false;
+try { var saved = JSON.parse(localStorage.getItem(LS) || "null"); if (saved && saved.start) state = {start: saved.start, done: saved.done || {}}; } catch (e) {}
+
+function persist(){
+  dirty = true;
+  try { localStorage.setItem(LS, JSON.stringify(state)); } catch (e) {}
+}
+
+function el(tag, cls, text){var e=document.createElement(tag); if(cls) e.className=cls; if(text!==undefined) e.textContent=text; return e;}
+
+function render(){
+  var start = parse(state.start), today = todayDate();
+  var tIdx = Math.round((today - start) / 864e5);
+  var days = [], i;
+  for (i = 0; i < N; i++) { var d = addDays(start, i); days.push({d: d, key: iso(d), done: !!state.done[iso(d)]}); }
+
+  var count = days.filter(function(x){return x.done;}).length;
+  var best = 0, run = 0;
+  days.forEach(function(x){ if (x.done) { run++; if (run > best) best = run; } else run = 0; });
+  var streak = 0, from = Math.min(tIdx, N - 1);
+  if (from >= 0 && !days[from].done) from--;
+  for (i = from; i >= 0 && days[i].done; i--) streak++;
+
+  document.getElementById("streak").textContent = streak;
+  document.getElementById("count").textContent = count + "/" + N;
+  document.getElementById("best").textContent = best;
+  var pct = Math.round(count / N * 100);
+  document.getElementById("pct").textContent = pct + "%";
+  document.getElementById("fill").style.width = pct + "%";
+  document.getElementById("start").value = state.start;
+
+  var label = "Today’s boost", msg;
+  if (count === N) { label = "Challenge complete"; msg = "You did all 30 days. Dairy-free champion! 🏆"; }
+  else if (tIdx < 0) { label = "Get ready"; msg = "Your challenge starts on " + start.toLocaleDateString("en-US", {month: "long", day: "numeric"}) + ". Prep your swaps!"; }
+  else if (tIdx >= N) { label = "Challenge window ended"; msg = "You finished with " + count + " dairy-free days. Pick a new start date to go again!"; }
+  else if (days[tIdx].done) { label = "Today ✓"; msg = "Done for today — " + streak + "-day streak. See you tomorrow! 🌱"; }
+  else { msg = LINES[tIdx]; }
+  document.getElementById("boostLabel").textContent = label;
+  document.getElementById("boost").textContent = msg;
+
+  var b = document.getElementById("badges"); b.textContent = "";
+  MILESTONES.forEach(function(m){ b.appendChild(el("span", "badge" + (count >= m[0] ? " on" : ""), m[1])); });
+
+  var tb = document.getElementById("rows"); tb.textContent = "";
+  days.forEach(function(x, idx){
+    var tr = el("tr", idx === tIdx ? "today" : (idx > tIdx ? "locked" : ""));
+    var td = el("td", "day", "Day " + (idx + 1));
+    MILESTONES.forEach(function(m){ if (m[0] === idx + 1) td.appendChild(el("span", "ms", "milestone")); });
+    tr.appendChild(td);
+    tr.appendChild(el("td", "", x.d.toLocaleDateString("en-US", {weekday: "short", month: "short", day: "numeric"}) + (idx === tIdx ? " · today" : "")));
+    var c = el("td"), btn = el("button", "chk");
+    btn.type = "button";
+    if (idx > tIdx) { btn.textContent = "Locked"; btn.disabled = true; }
+    else if (x.done) { btn.textContent = "✓ Dairy-free"; btn.className = "chk done"; btn.setAttribute("aria-pressed", "true"); }
+    else if (idx === tIdx) { btn.textContent = "Check in"; btn.setAttribute("aria-pressed", "false"); }
+    else { btn.textContent = "Missed"; btn.className = "chk missed"; btn.setAttribute("aria-pressed", "false"); }
+    if (!btn.disabled) btn.onclick = function(){ if (state.done[x.key]) delete state.done[x.key]; else state.done[x.key] = true; persist(); render(); };
+    c.appendChild(btn); tr.appendChild(c);
+    tr.appendChild(el("td", "msg", LINES[idx]));
+    tb.appendChild(tr);
+  });
+}
+
+document.getElementById("start").addEventListener("change", function(e){
+  if (e.target.value) { state.start = e.target.value; persist(); render(); }
+});
+var resetBtn = document.getElementById("reset"), resetTimer = null;
+resetBtn.addEventListener("click", function(){
+  if (!resetTimer) {
+    resetBtn.textContent = "Tap again to confirm";
+    resetTimer = setTimeout(function(){ resetBtn.textContent = "Reset"; resetTimer = null; }, 3000);
+  } else {
+    clearTimeout(resetTimer); resetTimer = null; resetBtn.textContent = "Reset";
+    state = {start: iso(todayDate()), done: {}}; persist(); render();
+  }
+});
+
+render();
+
+// Refresh "today" when the app is reopened on a new day
+document.addEventListener("visibilitychange", function(){ if (!document.hidden) render(); });
+window.addEventListener("pageshow", render);
+
+// Offline support
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function(){ navigator.serviceWorker.register("sw.js").catch(function(){}); });
+}
+</script>
+</body>
+</html>
